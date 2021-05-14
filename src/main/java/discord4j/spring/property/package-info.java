@@ -14,7 +14,4 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-@NonNullApi
-package discord4j.spring.event;
-
-import reactor.util.annotation.NonNullApi;
+package discord4j.spring.property;

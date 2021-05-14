@@ -15,6 +15,6 @@
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
 @NonNullApi
-package discord4j.spring.event;
+package discord4j.spring.event.context.annotation;
 
 import reactor.util.annotation.NonNullApi;

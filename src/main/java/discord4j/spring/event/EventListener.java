@@ -17,10 +17,21 @@
 package discord4j.spring.event;
 
 import discord4j.core.event.domain.Event;
+import java.util.Objects;
 import org.reactivestreams.Publisher;
+import org.springframework.core.ResolvableType;
 
 @FunctionalInterface
 public interface EventListener<T extends Event> {
+
+    default Class<T> getEventType() {
+        final ResolvableType type = ResolvableType.forInstance(this);
+        final ResolvableType target = type.as(EventListener.class);
+
+        @SuppressWarnings("unchecked")
+        final Class<T> generic = (Class<T>) target.resolveGeneric();
+        return Objects.requireNonNull(generic, "Failed to resolve generic");
+    }
 
     Publisher<?> onEvent(T event);
 }

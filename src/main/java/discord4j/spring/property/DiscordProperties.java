@@ -14,7 +14,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-@NonNullApi
-package discord4j.spring.event;
+package discord4j.spring.property;
 
-import reactor.util.annotation.NonNullApi;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
+
+@ConstructorBinding
+@ConfigurationProperties("discord4j")
+public final class DiscordProperties {
+
+    private final String token;
+
+    public DiscordProperties(final String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+}

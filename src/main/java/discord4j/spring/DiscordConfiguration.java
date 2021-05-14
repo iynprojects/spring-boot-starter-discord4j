@@ -24,17 +24,21 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.spring.event.CompositeEventListener;
 import discord4j.spring.event.EventListener;
+import discord4j.spring.property.DiscordProperties;
 import java.util.List;
+import java.util.Objects;
 import org.reactivestreams.Publisher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
 
 @Configuration
+@ComponentScan
 @EnableConfigurationProperties(DiscordProperties.class)
 public class DiscordConfiguration {
 
@@ -71,7 +75,8 @@ public class DiscordConfiguration {
             .withEventDispatcher(this::withEventDispatcher);
 
         builder = discordConfigurer.configureGatewayBootstrap(builder);
-        return builder.login().block();
+        final GatewayDiscordClient gatewayDiscordClient = builder.login().block();
+        return Objects.requireNonNull(gatewayDiscordClient, "GatewayDiscordClient is null");
     }
 
     private Publisher<?> withEventDispatcher(final EventDispatcher eventDispatcher) {

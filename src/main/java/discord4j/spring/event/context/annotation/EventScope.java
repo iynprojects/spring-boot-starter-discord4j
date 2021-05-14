@@ -14,22 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-package discord4j.spring;
+package discord4j.spring.event.context.annotation;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
+import discord4j.spring.event.context.EventContextConfiguration;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.springframework.context.annotation.Scope;
 
-@ConstructorBinding
-@ConfigurationProperties("discord4j")
-public final class DiscordProperties {
-
-    private final String token;
-
-    public DiscordProperties(final String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Scope(EventContextConfiguration.SCOPE_EVENT)
+public @interface EventScope {
 }

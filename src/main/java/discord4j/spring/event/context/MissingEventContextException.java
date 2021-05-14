@@ -14,7 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-@NonNullApi
-package discord4j.spring.event;
+package discord4j.spring.event.context;
 
-import reactor.util.annotation.NonNullApi;
+public final class MissingEventContextException extends RuntimeException {
+
+    private static final long serialVersionUID = -7547467653829068927L;
+
+    MissingEventContextException() {
+    }
+}

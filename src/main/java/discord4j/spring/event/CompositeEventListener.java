@@ -21,11 +21,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.reactivestreams.Publisher;
-import org.springframework.core.ResolvableType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 public final class CompositeEventListener implements EventListener<Event> {
 
@@ -33,19 +33,12 @@ public final class CompositeEventListener implements EventListener<Event> {
 
     private final Map<Class<?>, EventListener<?>> eventListeners;
 
-    public CompositeEventListener(Iterable<EventListener<?>> eventListeners) {
-        eventListeners = (eventListeners == null)
-            ? Collections.emptyList()
-            : eventListeners;
-
+    public CompositeEventListener(@Nullable Iterable<EventListener<?>> eventListeners) {
+        eventListeners = (eventListeners == null) ? Collections.emptyList() : eventListeners;
         this.eventListeners = new LinkedHashMap<>(0);
 
         for (final EventListener<?> eventListener : eventListeners) {
-            final ResolvableType type = ResolvableType.forClass(eventListener.getClass());
-            final ResolvableType target = type.as(EventListener.class);
-            final Class<?> generic = target.resolveGeneric();
-
-            this.eventListeners.put(generic, eventListener);
+            this.eventListeners.put(eventListener.getEventType(), eventListener);
         }
     }
 

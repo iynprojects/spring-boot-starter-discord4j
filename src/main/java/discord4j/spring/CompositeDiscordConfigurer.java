@@ -23,15 +23,14 @@ import discord4j.core.shard.GatewayBootstrap;
 import java.util.Collections;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.util.annotation.Nullable;
 
 public final class CompositeDiscordConfigurer implements DiscordConfigurer {
 
     private final Iterable<DiscordConfigurer> discordConfigurers;
 
-    CompositeDiscordConfigurer(final Iterable<DiscordConfigurer> discordConfigurers) {
-        this.discordConfigurers = (discordConfigurers == null)
-            ? Collections.emptyList()
-            : discordConfigurers;
+    public CompositeDiscordConfigurer(@Nullable final Iterable<DiscordConfigurer> discordConfigurers) {
+        this.discordConfigurers = (discordConfigurers == null) ? Collections.emptyList() : discordConfigurers;
     }
 
     @Override
