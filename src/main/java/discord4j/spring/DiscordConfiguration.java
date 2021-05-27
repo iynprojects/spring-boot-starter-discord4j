@@ -19,26 +19,19 @@ package discord4j.spring;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.domain.Event;
 import discord4j.core.shard.GatewayBootstrap;
-import discord4j.spring.event.CompositeEventListener;
-import discord4j.spring.event.EventListener;
 import discord4j.spring.property.DiscordProperties;
 import java.util.List;
 import java.util.Objects;
-import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import reactor.core.publisher.Mono;
 
 @Configuration
-@ComponentScan
 @EnableConfigurationProperties(DiscordProperties.class)
 public class DiscordConfiguration {
 
@@ -46,23 +39,20 @@ public class DiscordConfiguration {
 
     private final DiscordConfigurer discordConfigurer;
 
-    private final EventListener<Event> eventListener;
-
     public DiscordConfiguration(
         final DiscordProperties discordProperties,
-        final List<DiscordConfigurer> discordConfigurers,
-        final List<EventListener<?>> eventListeners
+        final List<DiscordConfigurer> discordConfigurers
     ) {
         this.discordProperties = discordProperties;
         discordConfigurer = new CompositeDiscordConfigurer(discordConfigurers);
-        eventListener = new CompositeEventListener(eventListeners);
     }
 
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "discord4j", name = "token")
     public DiscordClient discordClient() {
-        DiscordClientBuilder<DiscordClient, ?> builder = DiscordClient.builder(discordProperties.getToken());
+        final String token = discordProperties.getToken();
+        DiscordClientBuilder<DiscordClient, ?> builder = DiscordClient.builder(token);
         builder = discordConfigurer.configureDiscordClient(builder);
         return builder.build();
     }
@@ -71,17 +61,20 @@ public class DiscordConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnBean(DiscordClient.class)
     public GatewayDiscordClient gatewayDiscordClient(final DiscordClient discordClient) {
-        GatewayBootstrap<?> builder = discordClient.gateway()
-            .withEventDispatcher(this::withEventDispatcher);
-
+        GatewayBootstrap<?> builder = discordClient.gateway();
         builder = discordConfigurer.configureGatewayBootstrap(builder);
         final GatewayDiscordClient gatewayDiscordClient = builder.login().block();
         return Objects.requireNonNull(gatewayDiscordClient, "GatewayDiscordClient is null");
     }
 
-    private Publisher<?> withEventDispatcher(final EventDispatcher eventDispatcher) {
-        final Publisher<?> configuration = discordConfigurer.withEventDispatcher(eventDispatcher);
-        final Publisher<?> events = eventDispatcher.on(Event.class, eventListener::onEvent);
-        return Mono.when(configuration, events);
+    @Bean("gatewayDiscordClientDisposableBean")
+    @ConditionalOnBean(GatewayDiscordClient.class)
+    public DisposableBean disposableBean(final GatewayDiscordClient gatewayDiscordClient) {
+        final Thread thread = new Thread(() -> gatewayDiscordClient.onDisconnect().block());
+        thread.setName("Discord4J Spring Boot Starter Keep-Alive Thread");
+        thread.setDaemon(false);
+        thread.start();
+
+        return () -> gatewayDiscordClient.logout().block();
     }
 }

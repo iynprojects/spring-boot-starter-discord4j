@@ -14,19 +14,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-package discord4j.spring.event.context.annotation;
+package discord4j.spring.event;
 
-import discord4j.spring.event.context.EventContextConfiguration;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import org.springframework.context.annotation.Scope;
+import discord4j.core.shard.GatewayBootstrap;
+import discord4j.spring.DiscordConfigurer;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Scope(EventContextConfiguration.SCOPE_EVENT)
-public @interface EventScope {
+public final class DiscordConfigurerAdapter implements DiscordConfigurer {
+
+    private final EventDispatcherConfigurer configurer;
+
+    public DiscordConfigurerAdapter(final EventDispatcherConfigurer configurer) {
+        this.configurer = configurer;
+    }
+
+    @Override
+    public GatewayBootstrap<?> configureGatewayBootstrap(final GatewayBootstrap<?> gatewayBootstrap) {
+        return gatewayBootstrap.withEventDispatcher(configurer::configureEventDispatcher);
+    }
+
+    @Override
+    public String toString() {
+        return "DiscordConfigurerAdapter{" +
+            "configurer=" + configurer +
+            '}';
+    }
 }

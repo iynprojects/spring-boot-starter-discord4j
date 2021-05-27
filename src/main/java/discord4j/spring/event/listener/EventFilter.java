@@ -14,7 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-@NonNullApi
-package discord4j.spring.event.context;
+package discord4j.spring.event.listener;
 
-import reactor.util.annotation.NonNullApi;
+import discord4j.core.event.domain.Event;
+import org.reactivestreams.Publisher;
+
+@FunctionalInterface
+public interface EventFilter {
+
+    <T extends Event> Publisher<?> filter(T event, EventListener<T> listener);
+}

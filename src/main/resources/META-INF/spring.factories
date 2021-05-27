@@ -1,1 +1,4 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=discord4j.spring.DiscordConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+discord4j.spring.DiscordConfiguration,\
+discord4j.spring.event.EventConfiguration,\
+discord4j.spring.event.listener.EventListenerConfiguration

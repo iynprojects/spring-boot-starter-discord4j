@@ -14,46 +14,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-package discord4j.spring.event.context;
+package discord4j.spring.event.listener;
 
 import discord4j.core.event.domain.Event;
-import discord4j.spring.event.BlockingEventListener;
-import discord4j.spring.event.EventListener;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
-final class ContextualEventListener<T extends Event> implements EventListener<T> {
+public class EventListenerDecorator<T extends Event> implements EventListener<T> {
 
     private final EventListener<T> delegate;
 
-    ContextualEventListener(final EventListener<T> delegate) {
+    public EventListenerDecorator(final EventListener<T> delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Class<T> getEventType() {
+    public Class<? extends T> getEventType() {
         return delegate.getEventType();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Publisher<?> onEvent(final T event) {
-        return Flux.just(delegate)
-            .ofType(BlockingEventListener.class)
-            .flatMap(eventListener ->
-                EventContext.reactive(eventContext -> {
-                    eventListener.blockOnEvent(event);
-                    return eventContext;
-                }).subscribeOn(Schedulers.boundedElastic()))
-            .cast(Object.class)
-            .switchIfEmpty(Flux.defer(() -> delegate.onEvent(event)))
-            .transform(EventContext.setReactive(event));
+        return delegate.onEvent(event);
+    }
+
+    public EventListener<T> getDelegate() {
+        return delegate;
     }
 
     @Override
     public String toString() {
-        return "EventContextListenerProxy{" +
+        return "EventListenerDelegate{" +
             "delegate=" + delegate +
             '}';
     }

@@ -19,6 +19,7 @@ import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.*
 
 plugins {
     `java-library`
+    `maven-publish`
 
     id("com.github.ben-manes.versions") version "0.38.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
@@ -30,6 +31,9 @@ version = "0.1.0"
 java {
     sourceCompatibility = VERSION_1_8
     targetCompatibility = sourceCompatibility
+
+    withJavadocJar()
+    withSourcesJar()
 }
 
 configurations {
@@ -44,7 +48,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:2.4.5")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:2.5.0")
     }
 }
 
@@ -52,10 +56,18 @@ dependencies {
     api("com.discord4j:discord4j-core:3.1.5")
 
     api("org.springframework.boot:spring-boot-starter")
-
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+publishing {
+    publications {
+        creating
+        val mavenJava by creating(MavenPublication::class) {
+            val java by components
+            from(java)
+        }
+    }
 }
 
 tasks {
@@ -72,6 +84,6 @@ tasks {
 
     wrapper {
         distributionType = ALL
-        gradleVersion = "7.0.1"
+        gradleVersion = "7.0.2"
     }
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-package discord4j.spring.event;
+package discord4j.spring.event.listener;
 
 import discord4j.core.event.domain.Event;
 import java.util.Objects;
@@ -24,12 +24,12 @@ import org.springframework.core.ResolvableType;
 @FunctionalInterface
 public interface EventListener<T extends Event> {
 
-    default Class<T> getEventType() {
-        final ResolvableType type = ResolvableType.forInstance(this);
-        final ResolvableType target = type.as(EventListener.class);
+    default Class<? extends T> getEventType() {
+        ResolvableType type = ResolvableType.forInstance(this);
+        type = type.as(EventListener.class);
 
         @SuppressWarnings("unchecked")
-        final Class<T> generic = (Class<T>) target.resolveGeneric();
+        final Class<T> generic = (Class<T>) type.resolveGeneric();
         return Objects.requireNonNull(generic, "Failed to resolve generic");
     }
 

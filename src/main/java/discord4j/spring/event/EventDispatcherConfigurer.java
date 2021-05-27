@@ -16,19 +16,11 @@
  */
 package discord4j.spring.event;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.event.EventDispatcher;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @FunctionalInterface
-public interface BlockingEventListener<T extends Event> extends EventListener<T> {
+public interface EventDispatcherConfigurer {
 
-    @Override
-    default Publisher<?> onEvent(final T event) {
-        return Mono.fromRunnable(() -> blockOnEvent(event))
-            .subscribeOn(Schedulers.boundedElastic());
-    }
-
-    void blockOnEvent(T event);
+    Publisher<?> configureEventDispatcher(EventDispatcher eventDispatcher);
 }

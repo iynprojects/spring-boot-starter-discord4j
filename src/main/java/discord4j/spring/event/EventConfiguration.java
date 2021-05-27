@@ -14,34 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with spring-boot-starter-discord4j.  If not, see <https://www.gnu.org/licenses/>.
  */
-package discord4j.spring.event.context;
+package discord4j.spring.event;
 
-import discord4j.core.event.domain.Event;
-import discord4j.spring.event.EventListener;
-import discord4j.spring.event.context.annotation.EventScope;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import discord4j.spring.DiscordConfigurer;
+import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class EventContextConfiguration implements BeanPostProcessor {
+public class EventConfiguration {
 
-    public static final String SCOPE_EVENT = "event";
+    public static final String EVENT_DISPATCHER_DISCORD_CONFIGURER = "eventDispatcherDiscordConfigurer";
 
-    @Bean
-    @EventScope
-    public Event event() {
-        final EventContext eventContext = EventContext.threadLocal();
-        return eventContext.getEvent();
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(final Object bean, final String beanName) {
-        if (bean instanceof EventListener) {
-            final EventListener<?> eventListener = (EventListener<?>) bean;
-            return new ContextualEventListener<>(eventListener);
-        }
-
-        return bean;
+    @Bean(EVENT_DISPATCHER_DISCORD_CONFIGURER)
+    @ConditionalOnMissingBean(name = EVENT_DISPATCHER_DISCORD_CONFIGURER)
+    public DiscordConfigurer discordConfigurer(final List<EventDispatcherConfigurer> configurers) {
+        final EventDispatcherConfigurer configurer = new CompositeEventDispatcherConfigurer(configurers);
+        return new DiscordConfigurerAdapter(configurer);
     }
 }

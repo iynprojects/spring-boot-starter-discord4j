@@ -18,19 +18,23 @@ package discord4j.spring;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
-import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.GatewayBootstrap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
+import java.util.List;
 import reactor.util.annotation.Nullable;
 
 public final class CompositeDiscordConfigurer implements DiscordConfigurer {
 
-    private final Iterable<DiscordConfigurer> discordConfigurers;
+    private final List<DiscordConfigurer> discordConfigurers;
 
-    public CompositeDiscordConfigurer(@Nullable final Iterable<DiscordConfigurer> discordConfigurers) {
-        this.discordConfigurers = (discordConfigurers == null) ? Collections.emptyList() : discordConfigurers;
+    public CompositeDiscordConfigurer(@Nullable final Collection<DiscordConfigurer> discordConfigurers) {
+        this.discordConfigurers = (discordConfigurers == null)
+            ? new ArrayList<>(0)
+            : new ArrayList<>(discordConfigurers);
+
+        Collections.reverse(this.discordConfigurers);
     }
 
     @Override
@@ -51,13 +55,6 @@ public final class CompositeDiscordConfigurer implements DiscordConfigurer {
         }
 
         return gatewayBootstrap;
-    }
-
-    @Override
-    public Publisher<?> withEventDispatcher(final EventDispatcher eventDispatcher) {
-        return Flux.fromIterable(discordConfigurers)
-            // Error handling is neglected to match GatewayBootstrap#withEventDispatcher behavior
-            .flatMap(discordConfigurer -> discordConfigurer.withEventDispatcher(eventDispatcher));
     }
 
     @Override
